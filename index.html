@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>IMA · Check pre-uso</title>
+<style>
+:root{--bg:#f3f5f8;--card:#fff;--ink:#15202b;--mut:#5d6b79;--line:#dce3ea;--pri:#23303d;--pri2:#fdeee2;--ok:#1b7f3a;--okbg:#e5f4ea;--bad:#c0261f;--badbg:#fde8e6;--warn:#a85d00;--warnbg:#fff2dc;--info:#1d5fa8;--infobg:#e6effa}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.4}
+header{background:var(--pri);color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:10}
+header h1{font-size:17px;margin:0;flex:1;font-weight:650}
+header small{display:block;font-weight:400;opacity:.8;font-size:12px}
+header button{background:transparent;border:1px solid #ffffff70;color:#fff;border-radius:8px;padding:6px 10px;font-size:14px}
+main{max-width:780px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 12px}
+h3{font-size:15px;margin:18px 0 8px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+label{display:block;font-size:14px;color:var(--mut);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+textarea{min-height:70px;resize:vertical}
+.btn{display:block;width:100%;border:0;border-radius:12px;padding:15px;font:inherit;font-weight:650;cursor:pointer;margin-top:12px;background:var(--pri);color:#fff}
+.btn.sec{background:var(--pri2);color:var(--pri)}
+.btn.ok{background:var(--ok)}.btn.bad{background:var(--bad)}.btn.ghost{background:transparent;color:var(--mut);border:1px solid var(--line)}
+.big{font-size:20px;padding:22px}
+.home .btn{text-align:left;padding:20px}
+.home .btn span{display:block;font-weight:400;font-size:14px;opacity:.85;margin-top:2px}
+.item{border-top:1px solid var(--line);padding:12px 0}
+.item:first-child{border-top:0}
+.itxt{margin-bottom:8px}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px;margin-right:6px;vertical-align:1px}
+.tag.crit{background:var(--badbg);color:var(--bad)}
+.seg{display:flex;gap:8px}
+.seg button{flex:1;padding:11px 0;border-radius:10px;border:1px solid var(--line);background:#fff;font:inherit;font-weight:600;color:var(--mut);cursor:pointer}
+.seg button.on[data-v="OK"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg button.on[data-v="NO"]{background:var(--bad);border-color:var(--bad);color:#fff}
+.seg button.on[data-v="N/A"]{background:#6b7280;border-color:#6b7280;color:#fff}
+.obs{margin-top:8px}
+.hide{display:none!important}
+.check{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:15px}
+.check input{width:22px;height:22px;flex:none;margin-top:1px}
+.banner{border-radius:14px;padding:20px;text-align:center;margin-bottom:14px}
+.banner b{display:block;font-size:24px;margin-bottom:4px}
+.banner.ok{background:var(--okbg);color:var(--ok)}
+.banner.bad{background:var(--badbg);color:var(--bad)}
+.banner.warn{background:var(--warnbg);color:var(--warn)}
+ul.fallas{margin:8px 0 0;padding-left:20px}
+.badge{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-ok{background:var(--okbg);color:var(--ok)}.b-bad{background:var(--badbg);color:var(--bad)}.b-warn{background:var(--warnbg);color:var(--warn)}.b-info{background:var(--infobg);color:var(--info)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.kpi b{display:block;font-size:26px}
+.kpi span{font-size:12px;color:var(--mut)}
+.kpi.bad b{color:var(--bad)}.kpi.warn b{color:var(--warn)}.kpi.ok b{color:var(--ok)}
+.row{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.row>*{flex:1;min-width:130px}
+.rec{border:1px solid var(--line);border-radius:12px;padding:12px;margin-bottom:10px;background:#fff;cursor:pointer}
+.rec .top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+.rec .meta{font-size:13px;color:var(--mut);margin-top:4px}
+.rec .det{margin-top:10px;font-size:14px;border-top:1px dashed var(--line);padding-top:10px}
+.rec .det p{margin:4px 0}
+.alert{background:var(--badbg);border:1px solid #f3b8b3;color:var(--bad);border-radius:12px;padding:12px;margin-bottom:14px;font-size:15px}
+.pend{background:var(--warnbg);border:1px solid #f2d39d;color:var(--warn);border-radius:12px;padding:12px;margin-bottom:14px;font-size:15px}
+.note{font-size:13px;color:var(--mut)}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#15202b;color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;max-width:90%}
+.demo{background:#fff8d6;color:#6b5400;font-size:13px;text-align:center;padding:6px}
+.foot{text-align:center;font-size:12px;color:var(--mut);margin:20px 0}
+@media (max-width:480px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.tipo{display:flex;gap:10px;margin-bottom:4px}.tipo button{flex:1;padding:16px 8px;border-radius:12px;border:2px solid var(--line);background:#fff;font:inherit;font-weight:650;color:var(--mut);cursor:pointer}.tipo button.on{border-color:#d9661f;background:#fdeee2;color:#8a3a0a}.btn.acc{background:#d9661f}
+</style>
+</head>
+<body>
+<header>
+  <h1>IMA · Check pre-uso <small id="hsub">Vehículos y autoelevadores</small></h1>
+  <button id="btnHome" class="hide" onclick="go('home')">Inicio</button>
+</header>
+<div id="demo" class="demo hide">MODO DEMO: los datos se guardan solo en este dispositivo. Configurá API_URL para usarlo en línea.</div>
+<main id="app"></main>
+<div class="foot" id="foot"></div>
+
+<script>
+/* ======================= CONFIGURACIÓN ======================= */
+const CONFIG = {
+  API_URL: '',            // URL del Apps Script publicado (termina en /exec). Vacío = modo demo
+  CODIGO: 'R-MAN-01',     // código del registro en el SGC (ajustar a la codificación de IMA)
+  REVISION: 'Rev 00',
+  DEMO_PIN: '1234',       // solo modo demo. En línea el PIN se define en el Apps Script
+  PERSONAS: [],           // sugerencias de conductores / operadores (se puede tipear igual)
+  TIPOS: {
+    VEH: {
+      nombre:'Vehículo', icono:'🚚', medidor:'Km', paso:1,
+      EQUIPOS: [],        // ej: ['AB123CD','Camión grúa 01']
+      CRITICOS: [
+        {id:'v01', t:'Conductor apto: descansado, sin alcohol ni medicación que afecte la conducción'},
+        {id:'v02', t:'Licencia de conducir vigente (categoría correspondiente) + cédula, seguro y VTV/RTO'},
+        {id:'v03', t:'Frenos: pedal firme y freno de mano funcionando'},
+        {id:'v04', t:'Neumáticos: presión correcta, sin cortes ni desgaste excesivo'},
+        {id:'v05', t:'Luces: altas, bajas, posición, freno, giro y balizas'},
+        {id:'v06', t:'Dirección sin juego ni ruidos anormales'},
+        {id:'v07', t:'Cinturones de seguridad en buen estado y funcionando'},
+        {id:'v08', t:'Espejos retrovisores completos y en buen estado'},
+        {id:'v09', t:'Parabrisas sin roturas que impidan la visión + limpiaparabrisas OK'},
+        {id:'v10', t:'Bocina y alarma de retroceso funcionando'},
+        {id:'v11', t:'Matafuego cargado y vigente + balizas triangulares'},
+        {id:'v12', t:'Sin pérdidas de fluidos (aceite, combustible, frenos, refrigerante)'},
+        {id:'v13', t:'Tablero sin testigos de alerta (aceite, temperatura, frenos, motor)'},
+        {id:'v14', t:'Carga (piezas, estructuras, equipos) correctamente estibada y sujeta', na:true},
+        {id:'v15', t:'Hidrogrúa / pluma: comandos, mangueras y gancho con traba OK', na:true}
+      ],
+      MENORES: [
+        {id:'vm1', t:'Nivel de aceite y refrigerante'},
+        {id:'vm2', t:'Rueda de auxilio, gato y llave de rueda'},
+        {id:'vm3', t:'Botiquín de primeros auxilios'},
+        {id:'vm4', t:'Combustible suficiente para la jornada'},
+        {id:'vm5', t:'Carrocería sin golpes ni daños nuevos'},
+        {id:'vm6', t:'Limpieza interior y exterior'},
+        {id:'vm7', t:'Elementos para ingreso a mina (pértiga/banderín, radio, calzas) — si va a mina', na:true}
+      ],
+      CATEGORIAS: ['Falla mecánica','Siniestro vial','Infracción','Daño en carrocería','Daño en la carga','Faltante de elementos','Otro']
+    },
+    AUTO: {
+      nombre:'Autoelevador', icono:'🏗️', medidor:'Horómetro (h)', paso:0.1,
+      EQUIPOS: [],        // ej: ['AE-01 Toyota 2,5 t GLP','AE-02 Eléctrico 1,5 t']
+      CRITICOS: [
+        {id:'a01', t:'Operador habilitado (autorización / carnet de autoelevadorista vigente) y apto para operar'},
+        {id:'a02', t:'Horquillas sin fisuras, deformaciones ni desgaste excesivo; trabas de horquilla colocadas'},
+        {id:'a03', t:'Mástil y cadenas de elevación: sin eslabones dañados, lubricadas, sin juego anormal'},
+        {id:'a04', t:'Hidráulico: sin pérdidas en cilindros, mangueras y conexiones; elevación e inclinación responden bien'},
+        {id:'a05', t:'Freno de servicio y freno de estacionamiento funcionando'},
+        {id:'a06', t:'Dirección sin juego excesivo'},
+        {id:'a07', t:'Ruedas sin cortes ni desprendimientos; tuercas completas'},
+        {id:'a08', t:'Cinturón de seguridad funcionando'},
+        {id:'a09', t:'Bocina, alarma de retroceso y baliza giratoria funcionando'},
+        {id:'a10', t:'Techo protector y respaldo de carga sin daños'},
+        {id:'a11', t:'Matafuego cargado y vigente'},
+        {id:'a12', t:'Placa de capacidad de carga legible'},
+        {id:'a13', t:'Tablero sin testigos de alerta'},
+        {id:'a14', t:'GLP: tubo bien fijado, sin olor a gas, válvula y manguera en buen estado', na:true},
+        {id:'a15', t:'Eléctrico: batería sin pérdidas ni bornes sulfatados, cables y conector OK, carga suficiente', na:true}
+      ],
+      MENORES: [
+        {id:'am1', t:'Nivel de aceite de motor, hidráulico y refrigerante', na:true},
+        {id:'am2', t:'Espejos retrovisores'},
+        {id:'am3', t:'Asiento, apoyabrazos y piso antideslizante en buen estado'},
+        {id:'am4', t:'Luces de trabajo', na:true},
+        {id:'am5', t:'Combustible / GLP suficiente para el turno', na:true},
+        {id:'am6', t:'Limpieza general, sin acumulación de viruta, aceite o grasa'}
+      ],
+      CATEGORIAS: ['Falla mecánica / hidráulica','Golpe contra estructura, estantería o máquina','Caída o daño de carga','Incidente / casi accidente con personas','Daño en horquillas o mástil','Otro']
+    }
+  }
+};
+/* ============================================================= */
+
+const DEMO = !CONFIG.API_URL;
+const P = 'imacheck_';
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2,'0');
+const hoy = (d=new Date()) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const ahora = () => new Date().toISOString();
+const fmtHora = iso => { const d=new Date(iso); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const fmtFH = iso => { const d=new Date(iso); return `${pad(d.getDate())}/${pad(d.getMonth()+1)} ${fmtHora(iso)}`; };
+const uid = p => p + '-' + Date.now().toString(36).toUpperCase() + Math.random().toString(36).slice(2,5).toUpperCase();
+const ls = {
+  get(k,d){ try{ const v=localStorage.getItem(P+k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(P+k,JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(P+k); }catch(e){} }
+};
+function toast(m,ms=2600){ const t=document.createElement('div'); t.className='toast'; t.textContent=m; document.body.appendChild(t); setTimeout(()=>t.remove(),ms); }
+const T = k => CONFIG.TIPOS[k];
+
+/* ---------------- API (Apps Script o demo local) ---------------- */
+const api = {
+  async send(payload){
+    if (DEMO){
+      const db = ls.get('demo', []);
+      if (payload.action==='create') db.push({...payload.record, registrado: ahora()});
+      if (payload.action==='update'){ const r=db.find(x=>x.id===payload.id); if(r) Object.assign(r, payload.patch, {actualizado: ahora()}); }
+      ls.set('demo', db); return true;
+    }
+    try{
+      await fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+      return true;
+    }catch(e){
+      const q = ls.get('cola', []); q.push(payload); ls.set('cola', q);
+      toast('Sin señal: quedó guardado y se envía cuando vuelva la conexión', 4000);
+      return false;
+    }
+  },
+  async flush(){
+    if (DEMO) return;
+    const q = ls.get('cola', []); if(!q.length) return;
+    const rest=[];
+    for (const p of q){ try{ await fetch(CONFIG.API_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)}); }catch(e){ rest.push(p); } }
+    ls.set('cola', rest);
+    if (q.length>rest.length) toast(`Se enviaron ${q.length-rest.length} registro(s) pendientes`);
+  },
+  async list(key, desde, hasta){
+    if (DEMO){
+      if (key!==CONFIG.DEMO_PIN) throw new Error('PIN incorrecto');
+      return ls.get('demo', []).filter(r=>r.fecha>=desde && r.fecha<=hasta);
+    }
+    const u = `${CONFIG.API_URL}?action=list&key=${encodeURIComponent(key)}&desde=${desde}&hasta=${hasta}&t=${Date.now()}`;
+    const r = await fetch(u); const j = await r.json();
+    if (!j.ok) throw new Error(j.error||'Error al leer datos');
+    return j.data;
+  }
+};
+window.addEventListener('online', ()=>api.flush());
+
+/* ---------------- Navegación ---------------- */
+let refreshTimer=null;
+function go(view, arg){
+  clearInterval(refreshTimer);
+  $('#btnHome').classList.toggle('hide', view==='home');
+  window.scrollTo(0,0);
+  ({home, inicio, fin, panel})[view](arg);
+}
+const tipoSel = () => document.querySelector('.tipo button.on')?.dataset.t || 'VEH';
+function tipoHTML(sel){
+  return `<label>Tipo de equipo</label><div class="tipo">${Object.entries(CONFIG.TIPOS).map(([k,t])=>
+    `<button type="button" data-t="${k}" class="${k===sel?'on':''}">${t.icono} ${esc(t.nombre)}</button>`).join('')}</div>`;
+}
+function datosHTML(tk, eq, medLabel){
+  const u = ls.get('ultimo', {}), t=T(tk);
+  return `
+  <label>Conductor / operador</label><input id="fPer" list="dlPer" value="${esc(u.persona||'')}" autocomplete="name">
+  <datalist id="dlPer">${CONFIG.PERSONAS.map(c=>`<option value="${esc(c)}">`).join('')}</datalist>
+  <div class="row">
+    <div><label>${tk==='AUTO'?'Autoelevador (N° interno)':'Unidad (patente / interno)'}</label><input id="fEq" list="dlEq" value="${esc(eq||'')}" style="text-transform:uppercase">
+    <datalist id="dlEq">${t.EQUIPOS.map(c=>`<option value="${esc(c)}">`).join('')}</datalist></div>
+    <div><label>${esc(medLabel)}</label><input id="fMed" type="number" inputmode="decimal" min="0" step="${t.paso}"></div>
+  </div>`;
+}
+function bindTipo(render){
+  document.querySelectorAll('.tipo button').forEach(b=>b.onclick=()=>render(b.dataset.t));
+}
+
+/* ---------------- HOME ---------------- */
+function home(){
+  const act = ls.get('activo', null);
+  const actHoy = act && act.fecha===hoy();
+  app.innerHTML = `
+  <div class="home">
+    ${actHoy ? `<div class="pend">Tenés abierto el uso de <b>${esc(act.equipo)}</b> (${esc(T(act.tipoEquipo).nombre)}) desde las ${fmtHora(act.fechaHora)}. Al terminar registrá el fin de uso.</div>` : ''}
+    <button class="btn big" onclick="go('inicio')">✅ INICIO DE USO<span>Control pre-uso del vehículo o autoelevador</span></button>
+    <button class="btn big ok" onclick="go('fin')">🏁 FIN DE USO<span>Al terminar: novedades o “sin novedades”</span></button>
+    <button class="btn sec" onclick="go('panel')">📊 Panel Mantenimiento / Producción / Gerencia</button>
+  </div>`;
+  $('#foot').textContent = `${CONFIG.CODIGO} · ${CONFIG.REVISION} · Sistema de Gestión de Calidad IMA`;
+}
+
+/* ---------------- INICIO DE USO (pre-uso) ---------------- */
+let ans = {};
+function itemHTML(it, crit){
+  return `<div class="item" data-id="${it.id}">
+    <div class="itxt">${crit?'<span class="tag crit">CRÍTICO</span>':''}${esc(it.t)}</div>
+    <div class="seg"><button type="button" data-v="OK">OK</button><button type="button" data-v="NO">NO</button>${it.na?'<button type="button" data-v="N/A">N/A</button>':''}</div>
+    <textarea class="obs hide" placeholder="Describí la falla"></textarea>
+  </div>`;
+}
+function inicio(tk){
+  ans = {};
+  const u = ls.get('ultimo', {});
+  tk = tk || u.tipoEquipo || 'VEH';
+  const t = T(tk);
+  app.innerHTML = `
+  <div class="card">
+    <h2>Inicio de uso · ${new Date().toLocaleDateString('es-AR')}</h2>
+    ${tipoHTML(tk)}
+    ${datosHTML(tk, u.tipoEquipo===tk?u.equipo:'', t.medidor+' inicial')}
+  </div>
+  <div class="card">
+    <h2>Ítems críticos · ${esc(t.nombre)}</h2>
+    <p class="note">Si alguno está en <b>NO</b>, el equipo <b>no se usa</b> hasta corregirlo.</p>
+    <div>${t.CRITICOS.map(i=>itemHTML(i,true)).join('')}</div>
+  </div>
+  <div class="card">
+    <h2>Otros controles</h2>
+    <p class="note">Se registran como observación; no impiden el uso.</p>
+    <div>${t.MENORES.map(i=>itemHTML(i,false)).join('')}</div>
+  </div>
+  <div class="card">
+    <label>Observaciones generales (opcional)</label><textarea id="fObs"></textarea>
+    <label class="check"><input type="checkbox" id="fDecl"> Declaro que realicé el control y que la información es verdadera.</label>
+    <button class="btn big" onclick="enviarInicio('${tk}')">Evaluar y registrar</button>
+  </div>`;
+  bindTipo(inicio);
+  app.querySelectorAll('.item').forEach(el=>{
+    const id = el.dataset.id;
+    el.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{
+      el.querySelectorAll('.seg button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      ans[id] = {v:b.dataset.v, obs:(ans[id]||{}).obs||''};
+      el.querySelector('.obs').classList.toggle('hide', b.dataset.v!=='NO');
+    });
+    el.querySelector('.obs').oninput = e => { if(ans[id]) ans[id].obs = e.target.value; };
+  });
+}
+async function enviarInicio(tk){
+  const t=T(tk);
+  const persona=$('#fPer').value.trim(), equipo=$('#fEq').value.trim().toUpperCase(), med=$('#fMed').value;
+  if(!persona||!equipo||med==='') return toast(`Completá conductor/operador, equipo y ${t.medidor.toLowerCase()}`);
+  const todos=[...t.CRITICOS,...t.MENORES];
+  const falt = todos.filter(i=>!ans[i.id]);
+  if(falt.length){ toast(`Faltan ${falt.length} ítem(s) por responder`); document.querySelector(`.item[data-id="${falt[0].id}"]`).scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  const sinObs = todos.filter(i=>ans[i.id].v==='NO' && !ans[i.id].obs.trim());
+  if(sinObs.length){ toast('Describí cada falla marcada en NO'); document.querySelector(`.item[data-id="${sinObs[0].id}"] .obs`).focus(); return; }
+  if(!$('#fDecl').checked) return toast('Marcá la declaración antes de registrar');
+
+  const mk = lst => lst.filter(i=>ans[i.id].v==='NO').map(i=>({id:i.id,item:i.t,obs:ans[i.id].obs.trim()}));
+  const fallasCriticas=mk(t.CRITICOS), fallasMenores=mk(t.MENORES);
+  const estado = fallasCriticas.length ? 'NO APTO' : (fallasMenores.length ? 'APTO CON OBSERVACIONES' : 'APTO');
+  const respuestas = {}; todos.forEach(i=>respuestas[i.id+' '+i.t]=ans[i.id].v);
+  const rec = {id:uid('IU'), tipo:'INICIO DE USO', tipoEquipo:tk, fecha:hoy(), fechaHora:ahora(), persona, equipo, medidor:Number(med),
+    estado, fallasCriticas, fallasMenores, correcciones:[], observaciones:$('#fObs').value.trim(), respuestas};
+  ls.set('ultimo',{persona,equipo,tipoEquipo:tk});
+  await api.send({action:'create', record:rec});
+  if(!fallasCriticas.length){ activar(rec); resultadoOK(rec); }
+  else bloqueado(rec);
+}
+function activar(rec){ ls.set('activo',{id:rec.id,equipo:rec.equipo,tipoEquipo:rec.tipoEquipo,medidor:rec.medidor,fecha:rec.fecha,fechaHora:rec.fechaHora}); }
+function resultadoOK(rec){
+  const warn = rec.estado!=='APTO';
+  app.innerHTML = `
+  <div class="banner ${warn?'warn':'ok'}"><b>✔ EQUIPO APTO PARA USAR</b>${esc(rec.equipo)} · ${esc(rec.estado)}</div>
+  ${rec.fallasMenores.length?`<div class="card"><h2>Observaciones registradas</h2><ul class="fallas">${rec.fallasMenores.map(f=>`<li><b>${esc(f.item)}</b>: ${esc(f.obs)}</li>`).join('')}</ul><p class="note">Mantenimiento ya puede verlas en el panel.</p></div>`:''}
+  ${rec.correcciones.length?`<div class="card"><h2>Correcciones registradas</h2><ul class="fallas">${rec.correcciones.map(c=>`<li><b>${esc(c.item)}</b>: ${esc(c.accion)} (${esc(c.corrigio)}, ${fmtHora(c.fechaHora)})</li>`).join('')}</ul></div>`:''}
+  <p class="note" style="text-align:center">Registro ${esc(rec.id)} · ${fmtFH(rec.fechaHora)}</p>
+  <button class="btn" onclick="go('home')">Listo · Trabajá seguro</button>`;
+}
+function bloqueado(rec){
+  app.innerHTML = `
+  <div class="banner bad"><b>⛔ EL EQUIPO NO SE PUEDE USAR</b>${esc(rec.equipo)} · registrado como NO APTO</div>
+  <div class="card"><h2>Fallas críticas detectadas</h2>
+    <ul class="fallas">${rec.fallasCriticas.map(f=>`<li><b>${esc(f.item)}</b><br>${esc(f.obs)}</li>`).join('')}</ul>
+    <p class="note">Ya quedó registrado y Mantenimiento lo ve en el panel. Avisá a tu supervisor.</p>
+  </div>
+  <button class="btn ok big" onclick="corregir()">🔧 Corregir y volver a verificar</button>
+  <button class="btn sec" onclick="fueraServicio()">Dejar el equipo fuera de servicio</button>
+  <button class="btn ghost" onclick="go('inicio')">Usar otro equipo</button>`;
+  window._rec = rec;
+}
+function corregir(){
+  const rec=window._rec;
+  app.innerHTML = `
+  <div class="card"><h2>Corrección de fallas · ${esc(rec.equipo)}</h2>
+  <p class="note">Por cada falla indicá qué se hizo y verificá que quedó OK. Queda trazado con fecha y hora.</p>
+  ${rec.fallasCriticas.map((f,i)=>`
+    <div class="item">
+      <div class="itxt"><span class="tag crit">CRÍTICO</span><b>${esc(f.item)}</b><br><span class="note">Falla: ${esc(f.obs)}</span></div>
+      <label>¿Qué se hizo para corregirlo?</label><textarea id="acc${i}"></textarea>
+      <label class="check"><input type="checkbox" id="ver${i}"> Verificado: ahora funciona correctamente</label>
+    </div>`).join('')}
+  <label>Corrigió / autorizó (Mantenimiento o supervisor)</label><input id="fCorr" placeholder="Nombre de quien corrigió o autorizó">
+  <button class="btn ok big" onclick="enviarCorreccion()">Registrar corrección y liberar</button>
+  <button class="btn ghost" onclick="bloqueado(window._rec)">Volver</button></div>`;
+}
+async function enviarCorreccion(){
+  const rec=window._rec, corrigio=$('#fCorr').value.trim();
+  for(let i=0;i<rec.fallasCriticas.length;i++){
+    if(!$('#acc'+i).value.trim()) return toast('Describí la corrección de cada falla');
+    if(!$('#ver'+i).checked) return toast('Tenés que verificar cada ítem corregido');
+  }
+  if(!corrigio) return toast('Indicá quién corrigió o autorizó');
+  const t=ahora();
+  rec.correcciones = rec.fallasCriticas.map((f,i)=>({id:f.id,item:f.item,falla:f.obs,accion:$('#acc'+i).value.trim(),corrigio,fechaHora:t}));
+  rec.estado='APTO CON CORRECCIÓN';
+  await api.send({action:'update', id:rec.id, patch:{estado:rec.estado, correcciones:rec.correcciones, fechaHoraCorreccion:t}});
+  activar(rec); resultadoOK(rec);
+}
+async function fueraServicio(){
+  const rec=window._rec;
+  if(!confirm(`¿Confirmás que ${rec.equipo} queda FUERA DE SERVICIO?`)) return;
+  await api.send({action:'update', id:rec.id, patch:{estado:'FUERA DE SERVICIO', fechaHoraCorreccion:ahora()}});
+  app.innerHTML = `<div class="banner bad"><b>Equipo fuera de servicio</b>${esc(rec.equipo)} · avisá a Mantenimiento y a tu supervisor</div><button class="btn" onclick="go('home')">Volver al inicio</button>`;
+}
+
+/* ---------------- FIN DE USO ---------------- */
+function fin(tk){
+  const act = ls.get('activo', null), u = ls.get('ultimo', {});
+  tk = tk || (act&&act.tipoEquipo) || u.tipoEquipo || 'VEH';
+  const t=T(tk), actOk = act && act.tipoEquipo===tk;
+  app.innerHTML = `
+  <div class="card">
+    <h2>Fin de uso · ${new Date().toLocaleDateString('es-AR')}</h2>
+    ${tipoHTML(tk)}
+    ${datosHTML(tk, actOk?act.equipo:(u.tipoEquipo===tk?u.equipo:''), t.medidor+' final')}
+    ${actOk?`<p class="note">${esc(t.medidor)} al inicio: <b>${act.medidor}</b> (${fmtFH(act.fechaHora)})</p>`:''}
+  </div>
+  <button class="btn ok big" onclick="enviarFin('${tk}',false)">✔ SIN NOVEDADES</button>
+  <button class="btn sec" onclick="$('#nov').classList.remove('hide');this.classList.add('hide')">Tengo novedades para reportar</button>
+  <div class="card hide" id="nov">
+    <h2>Novedades</h2>
+    ${t.CATEGORIAS.map(c=>`<label class="check"><input type="checkbox" class="cat" value="${esc(c)}"> ${esc(c)}</label>`).join('')}
+    <label>Detalle</label><textarea id="fNov" placeholder="¿Qué pasó? ¿Dónde? ¿Qué se hizo?"></textarea>
+    <button class="btn bad" onclick="enviarFin('${tk}',true)">Registrar fin de uso con novedades</button>
+  </div>`;
+  bindTipo(fin);
+}
+async function enviarFin(tk, conNov){
+  const t=T(tk), act = ls.get('activo', null);
+  const persona=$('#fPer').value.trim(), equipo=$('#fEq').value.trim().toUpperCase(), med=$('#fMed').value;
+  if(!persona||!equipo||med==='') return toast(`Completá conductor/operador, equipo y ${t.medidor.toLowerCase()} final`);
+  const actOk = act && act.equipo===equipo && act.tipoEquipo===tk;
+  if(actOk && Number(med)<act.medidor) return toast(`El valor final no puede ser menor al inicial (${act.medidor})`);
+  let categorias=[], novedades='';
+  if(conNov){
+    categorias=[...document.querySelectorAll('.cat:checked')].map(x=>x.value);
+    novedades=$('#fNov').value.trim();
+    if(!categorias.length||!novedades) return toast('Elegí al menos una categoría y describí la novedad');
+  }
+  const uso = actOk ? Math.round((Number(med)-act.medidor)*10)/10 : null;
+  const rec={id:uid('FU'), tipo:'FIN DE USO', tipoEquipo:tk, fecha:hoy(), fechaHora:ahora(), persona, equipo, medidor:Number(med),
+    uso, inicioId: actOk? act.id : '', estado: conNov?'CON NOVEDADES':'SIN NOVEDADES', categorias, novedades};
+  ls.set('ultimo',{persona,equipo,tipoEquipo:tk});
+  await api.send({action:'create', record:rec});
+  if(actOk) ls.del('activo');
+  const unidad = tk==='AUTO'?'h':'km';
+  app.innerHTML = `<div class="banner ${conNov?'warn':'ok'}"><b>Fin de uso registrado</b>${esc(equipo)} · ${esc(rec.estado)}${uso!=null?` · ${uso} ${unidad}`:''}</div>
+  <p class="note" style="text-align:center">Registro ${esc(rec.id)} · ${fmtFH(rec.fechaHora)}</p>
+  <button class="btn" onclick="go('home')">Listo · Gracias</button>`;
+}
+
+/* ---------------- PANEL ---------------- */
+let panelKey = '';
+function panel(){
+  if(!panelKey){
+    app.innerHTML = `<div class="card"><h2>Panel de equipos</h2><label>PIN de acceso</label><input id="fPin" type="password" inputmode="numeric">
+    <button class="btn" onclick="panelKey=$('#fPin').value;panelCargar()">Ingresar</button>
+    ${DEMO?`<p class="note">Demo: PIN ${CONFIG.DEMO_PIN}</p>`:''}</div>`;
+    return;
+  }
+  panelCargar();
+}
+let panelDesde=hoy(), panelHasta=hoy(), panelTipo='', panelData=[], abiertos=new Set();
+async function panelCargar(){
+  try{ panelData = await api.list(panelKey, panelDesde, panelHasta); }
+  catch(e){ toast(e.message); panelKey=''; return panel(); }
+  panelRender();
+  clearInterval(refreshTimer);
+  refreshTimer=setInterval(async()=>{ try{ panelData=await api.list(panelKey,panelDesde,panelHasta); panelRender(); }catch(e){} }, 60000);
+}
+function badge(e){
+  const c = /^APTO$|SIN NOVEDADES/.test(e)?'b-ok': /NO APTO|FUERA/.test(e)?'b-bad': /CORRECCIÓN/.test(e)?'b-info':'b-warn';
+  return `<span class="badge ${c}">${esc(e)}</span>`;
+}
+function panelRender(){
+  const d=panelData.filter(r=>!panelTipo||r.tipoEquipo===panelTipo).sort((a,b)=>b.fechaHora.localeCompare(a.fechaHora));
+  const ini=d.filter(r=>r.tipo==='INICIO DE USO'), fn=d.filter(r=>r.tipo==='FIN DE USO');
+  const noApto=ini.filter(r=>r.estado==='NO APTO'||r.estado==='FUERA DE SERVICIO');
+  const corr=ini.filter(r=>r.estado==='APTO CON CORRECCIÓN');
+  const usados=ini.filter(r=>r.estado.startsWith('APTO'));
+  const sinFin=usados.filter(r=>!fn.some(o=>o.inicioId===r.id || (o.equipo===r.equipo && o.fecha===r.fecha && o.fechaHora>r.fechaHora)));
+  const conNov=fn.filter(r=>r.estado==='CON NOVEDADES');
+  const kpi=(n,t,c='')=>`<div class="kpi ${c}"><b>${n}</b><span>${t}</span></div>`;
+  app.innerHTML = `
+  <div class="card"><div class="row">
+    <div><label>Desde</label><input type="date" id="pD" value="${panelDesde}"></div>
+    <div><label>Hasta</label><input type="date" id="pH" value="${panelHasta}"></div>
+    <div><label>Tipo</label><select id="pT"><option value="">Todos</option>${Object.entries(CONFIG.TIPOS).map(([k,t])=>`<option value="${k}" ${k===panelTipo?'selected':''}>${esc(t.nombre)}s</option>`).join('')}</select></div>
+  </div>
+  <div class="row"><button class="btn sec" onclick="panelDesde=$('#pD').value;panelHasta=$('#pH').value;panelTipo=$('#pT').value;panelCargar()">Actualizar</button>
+  <button class="btn ghost" onclick="exportarCSV()">Descargar CSV</button></div>
+  <p class="note">Se actualiza solo cada 60 s · última lectura ${fmtHora(ahora())}</p></div>
+  <div class="kpis">
+    ${kpi(ini.length,'Controles pre-uso')}${kpi(usados.length,'Equipos habilitados','ok')}${kpi(noApto.length,'No aptos / fuera de servicio','bad')}
+    ${kpi(corr.length,'Habilitados con corrección','warn')}${kpi(sinFin.length,'Sin fin de uso','warn')}${kpi(conNov.length,'Fin de uso con novedades','bad')}
+  </div>
+  ${noApto.length?`<div class="alert"><b>⛔ Equipos bloqueados:</b> ${noApto.map(r=>`${esc(r.equipo)} (${esc(r.persona)})`).join(' · ')}</div>`:''}
+  ${sinFin.length?`<div class="pend"><b>Pendientes de fin de uso:</b> ${sinFin.map(r=>`${esc(r.equipo)} (${esc(r.persona)}, desde ${fmtHora(r.fechaHora)})`).join(' · ')}</div>`:''}
+  <div class="card"><h2>Registros (${d.length})</h2>
+  ${d.length?d.map(recHTML).join(''):'<p class="note">Sin registros en el período.</p>'}</div>`;
+  app.querySelectorAll('.rec').forEach(el=>el.onclick=()=>{ const id=el.dataset.id; abiertos.has(id)?abiertos.delete(id):abiertos.add(id); panelRender(); });
+}
+function recHTML(r){
+  const open=abiertos.has(r.id), t=T(r.tipoEquipo)||{nombre:'',icono:'',medidor:''};
+  let det='';
+  if(open){
+    if(r.tipo==='INICIO DE USO'){
+      det = `<div class="det">
+        <p><b>${esc(t.medidor)} inicial:</b> ${esc(r.medidor)}</p>
+        ${(r.fallasCriticas||[]).length?`<p><b>Fallas críticas:</b></p><ul class="fallas">${r.fallasCriticas.map(f=>`<li>${esc(f.item)}: ${esc(f.obs)}</li>`).join('')}</ul>`:''}
+        ${(r.correcciones||[]).length?`<p><b>Correcciones (${fmtFH(r.correcciones[0].fechaHora)}, ${esc(r.correcciones[0].corrigio)}):</b></p><ul class="fallas">${r.correcciones.map(c=>`<li>${esc(c.item)}: ${esc(c.accion)}</li>`).join('')}</ul>`:''}
+        ${(r.fallasMenores||[]).length?`<p><b>Observaciones:</b></p><ul class="fallas">${r.fallasMenores.map(f=>`<li>${esc(f.item)}: ${esc(f.obs)}</li>`).join('')}</ul>`:''}
+        ${r.observaciones?`<p><b>Obs. generales:</b> ${esc(r.observaciones)}</p>`:''}
+        <p class="note">ID ${esc(r.id)}</p></div>`;
+    } else {
+      det = `<div class="det"><p><b>${esc(t.medidor)} final:</b> ${esc(r.medidor)}${r.uso!=null?` · <b>Uso:</b> ${r.uso} ${r.tipoEquipo==='AUTO'?'h':'km'}`:''}</p>
+        ${(r.categorias||[]).length?`<p><b>Categorías:</b> ${r.categorias.map(esc).join(', ')}</p>`:''}
+        ${r.novedades?`<p><b>Detalle:</b> ${esc(r.novedades)}</p>`:''}<p class="note">ID ${esc(r.id)}</p></div>`;
+    }
+  }
+  return `<div class="rec" data-id="${esc(r.id)}"><div class="top"><div><b>${t.icono} ${esc(r.equipo)}</b> · ${esc(r.persona)}</div>${badge(r.estado)}</div>
+    <div class="meta">${esc(t.nombre)} · ${esc(r.tipo)} · ${fmtFH(r.fechaHora)}${open?'':' · tocá para ver detalle'}</div>${det}</div>`;
+}
+function exportarCSV(){
+  const cols=['id','tipo_registro','tipo_equipo','fecha','hora','persona','equipo','km_horometro','estado','fallas_criticas','correcciones','observaciones_menores','novedades'];
+  const q=v=>`"${String(v??'').replace(/"/g,'""')}"`;
+  const rows=panelData.filter(r=>!panelTipo||r.tipoEquipo===panelTipo).map(r=>[r.id,r.tipo,(T(r.tipoEquipo)||{}).nombre,r.fecha,fmtHora(r.fechaHora),r.persona,r.equipo,r.medidor,r.estado,
+    (r.fallasCriticas||[]).map(f=>f.item+': '+f.obs).join(' | '),
+    (r.correcciones||[]).map(c=>c.item+': '+c.accion+' ('+c.corrigio+')').join(' | '),
+    (r.fallasMenores||[]).map(f=>f.item+': '+f.obs).join(' | '),
+    [(r.categorias||[]).join(', '),r.novedades].filter(Boolean).join(' - ')].map(q).join(';'));
+  const blob=new Blob(['﻿'+cols.join(';')+'\n'+rows.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`${CONFIG.CODIGO}_${panelDesde}_${panelHasta}.csv`; a.click();
+}
+
+/* ---------------- Inicio ---------------- */
+if(DEMO) $('#demo').classList.remove('hide');
+api.flush();
+go('home');
+</script>
+</body>
+</html>
